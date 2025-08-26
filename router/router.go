@@ -1,6 +1,9 @@
 package router
 
 import (
+	"html/template"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/hanzala211/instagram/internal/api/handler"
@@ -14,6 +17,19 @@ func SetupRouter(userHandler *handler.UserHandler) *chi.Mux {
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"*"},
 	}))
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		tmpl, err := template.ParseFiles("templates/index.tmpl")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		data := map[string]string{
+			"Title":   "Home Page",
+			"Message": "Go Instagram",
+		}
+		tmpl.Execute(w, data)
+	})
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Route("/auth", func(u chi.Router) {
 			u.Post("/signup", userHandler.Signup)
