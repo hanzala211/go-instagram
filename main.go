@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/hanzala211/instagram/db"
 	"github.com/hanzala211/instagram/internal/api/handler"
@@ -29,7 +30,11 @@ func main() {
 	router := router.SetupRouter(userHandler)
 
 	fmt.Println("Starting authentication service")
-	err = http.ListenAndServe(utils.GetEnv("PORT", ":4001"), router) // test
+	port := utils.GetEnv("PORT", "4001")
+	if !strings.HasPrefix(port, ":") {
+		port = ":" + port
+	}
+	err = http.ListenAndServe(port, router)
 	if err != nil {
 		fmt.Println("Error starting authentication service")
 		panic(err)
