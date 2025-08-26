@@ -29,7 +29,7 @@ func main() {
 	router := router.SetupRouter(userHandler)
 
 	fmt.Println("Starting authentication service")
-	err = http.ListenAndServe(utils.GetEnv("PORT", ":4001"), router)
+	err = http.ListenAndServe(utils.GetEnv("PORT", ":4001"), router) // test
 	if err != nil {
 		fmt.Println("Error starting authentication service")
 		panic(err)
