@@ -1,1 +1,1 @@
-web: ./instagram
+web: instagram
