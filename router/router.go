@@ -18,7 +18,7 @@ func SetupRouter(userHandler *handler.UserHandler) *chi.Mux {
 		AllowedHeaders: []string{"*"},
 	}))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) { // redeployment
 		tmpl, err := template.ParseFiles("templates/index.tmpl")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
