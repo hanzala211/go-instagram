@@ -8,6 +8,7 @@ import (
 
 	"github.com/hanzala211/instagram/db"
 	"github.com/hanzala211/instagram/internal/api/handler"
+	"github.com/hanzala211/instagram/internal/cache"
 	"github.com/hanzala211/instagram/internal/repo"
 	"github.com/hanzala211/instagram/internal/services"
 	"github.com/hanzala211/instagram/router"
@@ -23,11 +24,17 @@ func main() {
 	
 	database := db.ConnectPGDB()
 	db.Migrations(database)
+	
+	log.Println("Initializing Redis connection...")
+	rdRepo := cache.NewRedisClient()
+	log.Println("Redis connection established successfully")
+	
+	
 	userRepo := repo.NewUserRepo(database)
 	store := repo.NewStorage(userRepo)
 	userService := services.NewUserService(store)
-	userHandler := handler.NewUserHandler(userService)
-	router := router.SetupRouter(userHandler)
+	userHandler := handler.NewUserHandler(userService, rdRepo)
+	router := router.SetupRouter(userHandler, rdRepo, userService)
 
 	fmt.Println("Starting authentication service")
 	port := utils.GetEnv("PORT", "4001")

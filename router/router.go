@@ -7,10 +7,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/hanzala211/instagram/internal/api/handler"
+	"github.com/hanzala211/instagram/internal/cache"
+	"github.com/hanzala211/instagram/internal/services"
 	"github.com/hanzala211/instagram/middlewares"
 )
 
-func SetupRouter(userHandler *handler.UserHandler) *chi.Mux {
+func SetupRouter(userHandler *handler.UserHandler, rdRepo *cache.RedisRepo, userService *services.UserService) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"*"},
@@ -35,7 +37,7 @@ func SetupRouter(userHandler *handler.UserHandler) *chi.Mux {
 			u.Post("/signup", userHandler.Signup)
 			u.Post("/login", userHandler.Login)	
 			u.Group(func(r chi.Router) {
-				r.Use(middlewares.AuthMiddleware)
+				r.Use(middlewares.AuthMiddleware(rdRepo, userService))
 				r.Get("/me", userHandler.ME)
 			})
 		})

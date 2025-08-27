@@ -2,13 +2,20 @@ package middlewares
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/hanzala211/instagram/internal/api/models"
+	"github.com/hanzala211/instagram/internal/cache"
+	"github.com/hanzala211/instagram/internal/services"
 	"github.com/hanzala211/instagram/utils"
+	"github.com/redis/go-redis/v9"
 )
-
-func AuthMiddleware(next http.Handler) http.Handler {
+func AuthMiddleware(rdRepo *cache.RedisRepo, userService *services.UserService) func (next http.Handler) http.Handler{
+	return func (next http.Handler) http.Handler {
 		return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
@@ -33,7 +40,32 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		userId := claims["userId"].(string)
-		ctx := context.WithValue(r.Context(), "userId", userId)
+		fmtStr := fmt.Sprintf("user-%s", userId)
+		user, err := rdRepo.Get(fmtStr)
+		fmt.Printf(user)
+		if err != nil && err != redis.Nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		var userData *models.User
+		if err == redis.Nil {
+			userData, err = userService.GetUserById(userId)
+			if err != nil {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			err = rdRepo.Set(fmtStr, userData, time.Hour * 24)
+			if err != nil {
+				fmt.Printf("Error setting user data in redis: %v", err)
+			}
+		}
+		err = json.Unmarshal([]byte(user), &userData)
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		ctx := context.WithValue(r.Context(), "user", userData)
 		next.ServeHTTP(w, r.WithContext(ctx))
 		})
+}
 }

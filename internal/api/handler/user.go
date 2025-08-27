@@ -2,24 +2,29 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hanzala211/instagram/internal/api/dto"
 	"github.com/hanzala211/instagram/internal/api/models"
+	"github.com/hanzala211/instagram/internal/cache"
 	"github.com/hanzala211/instagram/internal/services"
 	"github.com/hanzala211/instagram/utils"
 )
 
 type UserHandler struct {
 	userService *services.UserService
+	rdRepo *cache.RedisRepo
 }
 
 var validate = validator.New()
 
-func NewUserHandler(userService *services.UserService) *UserHandler {
+func NewUserHandler(userService *services.UserService, rdRepo *cache.RedisRepo) *UserHandler {
 	return &UserHandler{
 		userService: userService,
+		rdRepo: rdRepo,
 	}
 }
 
@@ -44,12 +49,18 @@ func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	err = h.userService.CreateUser(user)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err.Error())
-		return
+		return	
 	}
 	token, err := utils.CreateToken(user.ID, utils.GetEnv("JWT_SECRET", "secret"))
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
+	}
+	fmtKey := fmt.Sprintf("user-%s", user.ID)
+	jso, err := json.Marshal(&user)
+	err = h.rdRepo.Set(fmtKey, jso, time.Hour * 24)
+	if err != nil {
+		fmt.Println(err)
 	}
 	utils.WriteResponse(w, 200, map[string]any{"token": token, "user": user})
 }
@@ -87,11 +98,6 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) ME(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value("userId").(string)
-	user, err := h.userService.GetUserById(userId)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	user := r.Context().Value("user").(*models.User)
 	utils.WriteResponse(w, 200, map[string]any{"user": user})
 }
