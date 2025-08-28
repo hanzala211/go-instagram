@@ -43,20 +43,21 @@ func AuthMiddleware(rdRepo *cache.RedisRepo, userService *services.UserService) 
 		fmtStr := fmt.Sprintf("user-%s", userId)
 		user, err := rdRepo.Get(fmtStr)
 		fmt.Printf(user)
-		if err != nil && err != redis.Nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
 		var userData *models.User
-		if err == redis.Nil {
-			userData, err = userService.GetUserById(userId)
-			if err != nil {
+		if err != nil  {
+			if err == redis.Nil {
+				userData, err = userService.GetUserById(userId)
+				if err != nil {
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
+					return
+				}
+				err = rdRepo.Set(fmtStr, userData, time.Hour * 24)
+				if err != nil {
+					fmt.Printf("Error setting user data in redis: %v", err)
+				}
+			}else{
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
-			}
-			err = rdRepo.Set(fmtStr, userData, time.Hour * 24)
-			if err != nil {
-				fmt.Printf("Error setting user data in redis: %v", err)
 			}
 		}
 		err = json.Unmarshal([]byte(user), &userData)
