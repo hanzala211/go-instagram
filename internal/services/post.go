@@ -19,3 +19,8 @@ func (s *PostService) CreatePost(post *models.Post) error {
 	err := s.store.Post.CreatePost(post)
 	return err
 }
+
+func (s *PostService) GetPostById(post *models.Post) error {
+	err := s.store.Post.GetPostById(post)
+	return err
+}

@@ -16,6 +16,11 @@ func NewPostRepo(db *pg.DB) *PostRepo {
 }
 
 func (r *PostRepo) CreatePost(post *models.Post) error {
-	_, err := r.db.Model(&post).Insert(&post)
+	_, err := r.db.Model(post).Insert()
+	return err
+}
+
+func (r *PostRepo) GetPostById(post *models.Post) error {
+	err := r.db.Model(post).WherePK().Relation("User").Select()
 	return err
 }

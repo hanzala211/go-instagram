@@ -37,8 +37,14 @@ func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := validate.Struct(req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err.Error())
-		return
+		if errs, ok := err.(validator.ValidationErrors); ok {
+			var messages []string
+			for _, e := range errs {
+				messages = append(messages, fmt.Sprintf("Field '%s' failed on the %s rule", e.Field(), e.Tag()))
+			}
+			utils.WriteError(w, http.StatusBadRequest, messages)
+			return
+		}
 	}
 	user := &models.User{
 		Username: req.Username,

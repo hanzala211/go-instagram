@@ -34,6 +34,7 @@ func ConnectPGDB() *pg.DB {
 func Migrations(db *pg.DB) {
 	modelSlice := []interface{}{
 		(*models.User)(nil),
+		(*models.Post)(nil),
 	}
 
 	for _, model := range modelSlice {
@@ -54,6 +55,11 @@ func Migrations(db *pg.DB) {
 			ALTER COLUMN "createdAt" SET DEFAULT CURRENT_TIMESTAMP,
 			ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
+		ALTER TABLE posts
+			ALTER COLUMN "id" SET DEFAULT gen_random_uuid(),
+			ALTER COLUMN "createdAt" SET DEFAULT CURRENT_TIMESTAMP,
+			ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
+
 		CREATE OR REPLACE FUNCTION update_timestamp()
 		RETURNS TRIGGER AS $$
 		BEGIN
@@ -67,6 +73,13 @@ func Migrations(db *pg.DB) {
 			BEFORE UPDATE ON users
 			FOR EACH ROW
 			EXECUTE FUNCTION update_timestamp();
+
+		DROP TRIGGER IF EXISTS update_posts_timestamp ON posts;
+		CREATE TRIGGER update_posts_timestamp
+			BEFORE UPDATE ON posts
+			FOR EACH ROW
+			EXECUTE FUNCTION update_timestamp();
+
 	`)
 
 	if err != nil {

@@ -45,6 +45,7 @@ func SetupRouter(userHandler *handler.UserHandler, postHandler *handler.PostHand
 			u.Group(func(a chi.Router) {
 				a.Use(middlewares.AuthMiddleware(rdRepo, userService))
 				a.Post("/", postHandler.CreatePost)
+				a.Get("/{postID}", postHandler.GetPostById)
 			})
 
 		})
