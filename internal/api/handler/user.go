@@ -16,7 +16,7 @@ import (
 
 type UserHandler struct {
 	userService *services.UserService
-	rdRepo *cache.RedisRepo
+	rdRepo      *cache.RedisRepo
 }
 
 var validate = validator.New()
@@ -24,7 +24,7 @@ var validate = validator.New()
 func NewUserHandler(userService *services.UserService, rdRepo *cache.RedisRepo) *UserHandler {
 	return &UserHandler{
 		userService: userService,
-		rdRepo: rdRepo,
+		rdRepo:      rdRepo,
 	}
 }
 
@@ -49,7 +49,7 @@ func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	err = h.userService.CreateUser(user)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err.Error())
-		return	
+		return
 	}
 	token, err := utils.CreateToken(user.ID, utils.GetEnv("JWT_SECRET", "secret"))
 	if err != nil {
@@ -58,7 +58,7 @@ func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 	fmtKey := fmt.Sprintf("user-%s", user.ID)
 	jso, err := json.Marshal(&user)
-	err = h.rdRepo.Set(fmtKey, jso, time.Hour * 24)
+	err = h.rdRepo.Set(fmtKey, jso, time.Hour*24)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -101,3 +101,4 @@ func (h *UserHandler) ME(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*models.User)
 	utils.WriteResponse(w, 200, map[string]any{"user": user})
 }
+

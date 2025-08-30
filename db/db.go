@@ -23,7 +23,7 @@ func ConnectPGDB() *pg.DB {
 			InsecureSkipVerify: true,
 		},
 	})
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 	if err := db.Ping(ctx); err != nil {
 		log.Fatal("Failed to connect to database", err)
@@ -38,7 +38,7 @@ func Migrations(db *pg.DB) {
 
 	for _, model := range modelSlice {
 		err := db.Model(model).CreateTable(&orm.CreateTableOptions{
-			IfNotExists: true,
+			IfNotExists:   true,
 			Temp:          false,
 			FKConstraints: true,
 		})

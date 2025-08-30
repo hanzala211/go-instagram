@@ -12,7 +12,7 @@ import (
 	"github.com/hanzala211/instagram/middlewares"
 )
 
-func SetupRouter(userHandler *handler.UserHandler, rdRepo *cache.RedisRepo, userService *services.UserService) *chi.Mux {
+func SetupRouter(userHandler *handler.UserHandler, postHandler *handler.PostHandler, rdRepo *cache.RedisRepo, userService *services.UserService) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"*"},
@@ -20,7 +20,7 @@ func SetupRouter(userHandler *handler.UserHandler, rdRepo *cache.RedisRepo, user
 		AllowedHeaders: []string{"*"},
 	}))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) { // redeployment
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFiles("templates/index.tmpl")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -35,11 +35,18 @@ func SetupRouter(userHandler *handler.UserHandler, rdRepo *cache.RedisRepo, user
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Route("/auth", func(u chi.Router) {
 			u.Post("/signup", userHandler.Signup)
-			u.Post("/login", userHandler.Login)	
+			u.Post("/login", userHandler.Login)
 			u.Group(func(r chi.Router) {
 				r.Use(middlewares.AuthMiddleware(rdRepo, userService))
 				r.Get("/me", userHandler.ME)
 			})
+		})
+		r.Route("/posts", func(u chi.Router) {
+			u.Group(func(a chi.Router) {
+				a.Use(middlewares.AuthMiddleware(rdRepo, userService))
+				a.Post("/", postHandler.CreatePost)
+			})
+
 		})
 	})
 	return r

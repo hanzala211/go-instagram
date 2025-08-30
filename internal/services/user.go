@@ -66,3 +66,4 @@ func (s *UserService) GetUserById(id string) (existingUser *models.User, err err
 	}
 	return existingUser, nil
 }
+
