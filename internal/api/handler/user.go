@@ -33,7 +33,7 @@ func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(req)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
+		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 	if err := validate.Struct(req); err != nil {
@@ -101,4 +101,3 @@ func (h *UserHandler) ME(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*models.User)
 	utils.WriteResponse(w, 200, map[string]any{"user": user})
 }
-

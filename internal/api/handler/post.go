@@ -26,7 +26,7 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(signupReq)
 	err := validate.Struct(signupReq)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
+		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 

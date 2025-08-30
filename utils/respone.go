@@ -14,7 +14,7 @@ func WriteResponse(w http.ResponseWriter, status int, data any) {
 	})
 }
 
-func WriteError(w http.ResponseWriter, status int, message string) {
+func WriteError(w http.ResponseWriter, status int, message any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]any{
