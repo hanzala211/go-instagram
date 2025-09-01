@@ -21,7 +21,6 @@ func main() {
 	if err != nil {
 		log.Println("Warning: .env file not found, using environment variables")
 	}
-
 	database := db.ConnectPGDB()
 
 	db.Migrations(database)
@@ -38,7 +37,6 @@ func main() {
 	userHandler := handler.NewUserHandler(userService, rdRepo)
 	postHandler := handler.NewPostHandler(postService)
 	router := router.SetupRouter(userHandler, postHandler, rdRepo, userService)
-
 	fmt.Println("Starting authentication service")
 	port := utils.GetEnv("PORT", "4001")
 	if !strings.HasPrefix(port, ":") {

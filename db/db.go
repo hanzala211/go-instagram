@@ -35,6 +35,7 @@ func Migrations(db *pg.DB) {
 	modelSlice := []interface{}{
 		(*models.User)(nil),
 		(*models.Post)(nil),
+		(*models.Likes)(nil),
 	}
 
 	for _, model := range modelSlice {
@@ -60,6 +61,10 @@ func Migrations(db *pg.DB) {
 			ALTER COLUMN "createdAt" SET DEFAULT CURRENT_TIMESTAMP,
 			ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
+		ALTER TABLE likes
+			ALTER COLUMN "createdAt" SET DEFAULT CURRENT_TIMESTAMP,
+			ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
+
 		CREATE OR REPLACE FUNCTION update_timestamp()
 		RETURNS TRIGGER AS $$
 		BEGIN
@@ -79,8 +84,14 @@ func Migrations(db *pg.DB) {
 			BEFORE UPDATE ON posts
 			FOR EACH ROW
 			EXECUTE FUNCTION update_timestamp();
+	
+		DROP TRIGGER IF EXISTS update_likes_timestamp ON likes;
+		CREATE TRIGGER update_likes_timestamp
+			BEFORE UPDATE ON likes
+			FOR EACH ROW
+			EXECUTE FUNCTION update_timestamp();
 
-	`)
+		`)
 
 	if err != nil {
 		fmt.Printf("migration SQL execution error: %v\n", err)

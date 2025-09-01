@@ -75,3 +75,44 @@ func (h *PostHandler) GetPostById(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteResponse(w, 200, post)
 }
+
+func (h *PostHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*models.User)
+	userID := user.ID
+
+	posts, err := h.postService.GetPostsForUser(userID)
+	fmt.Println(err)
+	if err != nil {
+		if err == pg.ErrNoRows {
+			utils.WriteError(w, 400, "No Posts Found!")
+			return
+		}
+		utils.WriteError(w, 400, "Error Occured")
+		return
+	}
+	utils.WriteResponse(w, 200, posts)
+}
+
+func (h *PostHandler) LikePost(w http.ResponseWriter, r *http.Request) {
+	postID := chi.URLParam(r, "postID")
+	if postID == "" {
+		utils.WriteResponse(w, 400, "Invalid ID")
+		return
+	}
+	post := &models.Post{
+		ID: postID,
+	}
+	err := h.postService.GetPostById(post)
+
+	if err != nil {
+		utils.WriteError(w, 400, "Post Not Found!")
+		return
+	}
+	user := r.Context().Value("user").(*models.User)
+	err = h.postService.LikePost(postID, user.ID)
+	if err != nil {
+		utils.WriteError(w, 400, "Error Occured!")
+		return
+	}
+	utils.WriteResponse(w, 200, "Post Liked Successfully!")
+}

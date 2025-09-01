@@ -12,6 +12,8 @@ type UserStorage interface {
 type PostStorage interface {
 	CreatePost(post *models.Post) error
 	GetPostById(post *models.Post) error
+	GetUserPosts(userId string) ([]*models.Post, error)
+	LikePost(like *models.Likes) error
 }
 
 type Storage struct {

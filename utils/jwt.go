@@ -6,13 +6,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type JWTClamis struct {
+type JWTClaims struct {
 	UserId string `json:"userId"`
 	jwt.RegisteredClaims
 }
 
 func CreateToken(userId string, secret string) (string, error) {
-	claims := JWTClamis{
+	claims := JWTClaims{
 		UserId: userId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
