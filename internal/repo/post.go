@@ -24,7 +24,7 @@ func (r *PostRepo) GetPostById(post *models.Post) error {
 	err := r.db.Model(post).
 		WherePK().
 		Relation("User").
-		// Relation("Likes").
+		Relation("Likes").
 		Join("LEFT JOIN likes ON likes.post_id = post.id").
 		ColumnExpr("post.*, COUNT(likes.post_id) AS likes_count").
 		Group("post.id", "user.id").
@@ -34,7 +34,7 @@ func (r *PostRepo) GetPostById(post *models.Post) error {
 
 func (r *PostRepo) GetUserPosts(userId string) ([]*models.Post, error) {
 	var posts []*models.Post
-	err := r.db.Model(&models.Post{}).Where("id = ?", userId).Select()
+	err := r.db.Model(&posts).Where("user_id = ?", userId).ColumnExpr("*, (SELECT COUNT(*) FROM likes WHERE likes.post_id = post.id) as likes_count").Select()
 	if err != nil {
 		return nil, err
 	}
