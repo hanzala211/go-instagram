@@ -34,7 +34,9 @@ func (r *PostRepo) GetPostById(post *models.Post) error {
 
 func (r *PostRepo) GetUserPosts(userId string) ([]*models.Post, error) {
 	var posts []*models.Post
-	err := r.db.Model(&posts).Where("user_id = ?", userId).ColumnExpr("*, (SELECT COUNT(*) FROM likes WHERE likes.post_id = post.id) as likes_count").Select()
+	err := r.db.Model(&posts).Where("user_id = ?", userId).
+		ColumnExpr("*, (SELECT COUNT(*) FROM likes WHERE likes.post_id = post.id) as likes_count").
+		Select()
 	if err != nil {
 		return nil, err
 	}
