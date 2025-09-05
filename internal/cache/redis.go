@@ -17,7 +17,7 @@ type RedisRepo struct {
 func NewRedisClient() *RedisRepo {
 	redisURL := utils.GetEnv("REDIS_URL", "redis://localhost:6379")
 	log.Printf("Attempting to connect to Redis at: %s", redisURL)
-	
+
 	opt, err := redis.ParseURL(redisURL)
 	if err != nil {
 		log.Printf("Failed to parse Redis URL: %v", err)
@@ -31,16 +31,16 @@ func NewRedisClient() *RedisRepo {
 	opt.MaxRetries = 3
 
 	client := redis.NewClient(opt)
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	
+
 	_, err = client.Ping(ctx).Result()
 	if err != nil {
 		log.Printf("Failed to connect to Redis: %v", err)
 		panic(fmt.Sprintf("Cannot connect to Redis: %v", err))
 	}
-	
+
 	log.Println("Connection to Redis successful")
 	return &RedisRepo{Client: client}
 }
@@ -60,3 +60,4 @@ func (r *RedisRepo) Get(key string) (string, error) {
 func (r *RedisRepo) Delete(key string) error {
 	return r.Client.Del(context.Background(), key).Err()
 }
+

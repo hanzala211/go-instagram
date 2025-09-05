@@ -14,6 +14,7 @@ type PostStorage interface {
 	GetPostById(post *models.Post) error
 	GetUserPosts(userId string) ([]*models.Post, error)
 	LikePost(like *models.Likes) error
+	DislikePost(postId string, userId string) error
 }
 
 type Storage struct {

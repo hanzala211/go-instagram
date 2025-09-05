@@ -47,3 +47,8 @@ func (r *PostRepo) LikePost(like *models.Likes) error {
 	_, err := r.db.Model(like).Insert()
 	return err
 }
+
+func (r *PostRepo) DislikePost(postId string, userId string) error {
+	_, err := r.db.Model(&models.Likes{PostID: postId, UserID: userId}).WherePK().Delete()
+	return err
+}

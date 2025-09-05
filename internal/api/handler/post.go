@@ -116,3 +116,28 @@ func (h *PostHandler) LikePost(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.WriteResponse(w, 200, "Post Liked Successfully!")
 }
+
+func (h *PostHandler) DislikePost(w http.ResponseWriter, r *http.Request) {
+	postID := chi.URLParam(r, "postID")
+	if postID == "" {
+		utils.WriteResponse(w, 400, "Invalid ID")
+		return
+	}
+	post := &models.Post{
+		ID: postID,
+	}
+	err := h.postService.GetPostById(post)
+
+	if err != nil {
+		utils.WriteError(w, 400, "Post Not Found!")
+		return
+	}
+	user := r.Context().Value("user").(*models.User)
+	err = h.postService.DislikePost(postID, user.ID)
+	fmt.Println(err)
+	if err != nil {
+		utils.WriteError(w, 400, "Error Occured!")
+		return
+	}
+	utils.WriteResponse(w, 200, "Post Disliked Successfully!")
+}

@@ -49,6 +49,7 @@ func SetupRouter(userHandler *handler.UserHandler, postHandler *handler.PostHand
 				a.Route("/{postID}", func(r chi.Router) {
 					r.Get("/", postHandler.GetPostById)
 					r.Put("/like", postHandler.LikePost)
+					r.Put("/dislike", postHandler.DislikePost)
 				})
 			})
 

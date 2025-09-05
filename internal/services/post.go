@@ -37,3 +37,8 @@ func (s *PostService) LikePost(postId string, userId string) error {
 	err := s.store.Post.LikePost(like)
 	return err
 }
+
+func (s *PostService) DislikePost(postId string, userId string) error {
+	err := s.store.Post.DislikePost(postId, userId)
+	return err
+}
