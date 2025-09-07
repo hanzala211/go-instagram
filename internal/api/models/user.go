@@ -11,3 +11,4 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt" pg:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" pg:"updatedAt"`
 }
+

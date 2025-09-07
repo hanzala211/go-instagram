@@ -141,3 +141,14 @@ func (h *PostHandler) DislikePost(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.WriteResponse(w, 200, "Post Disliked Successfully!")
 }
+
+func (h *PostHandler) PostSuggestions(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*models.User)
+	posts, err := h.postService.HomePostSuggestions(user.ID)
+	fmt.Println(err)
+	if err != nil {
+		utils.WriteError(w, 400, "Error Occured!")
+		return
+	}
+	utils.WriteResponse(w, 200, posts)
+}

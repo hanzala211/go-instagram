@@ -60,4 +60,3 @@ func (r *RedisRepo) Get(key string) (string, error) {
 func (r *RedisRepo) Delete(key string) error {
 	return r.Client.Del(context.Background(), key).Err()
 }
-

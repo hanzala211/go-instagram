@@ -51,8 +51,8 @@ func SetupRouter(userHandler *handler.UserHandler, postHandler *handler.PostHand
 					r.Put("/like", postHandler.LikePost)
 					r.Put("/dislike", postHandler.DislikePost)
 				})
+				a.Get("/suggestions", postHandler.PostSuggestions)
 			})
-
 		})
 	})
 	return r

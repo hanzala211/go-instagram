@@ -42,3 +42,7 @@ func (s *PostService) DislikePost(postId string, userId string) error {
 	err := s.store.Post.DislikePost(postId, userId)
 	return err
 }
+
+func (s *PostService) HomePostSuggestions(userId string) ([]*models.Post, error) {
+	return s.store.Post.GetPostSuggestions(userId)
+}
