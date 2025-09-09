@@ -70,7 +70,7 @@ func (r *PostRepo) DislikePost(postId string, userId string) error {
 
 func (r *PostRepo) GetPostSuggestions(userId string) ([]*models.Post, error) {
 	var posts []*models.Post
-	err := r.db.Model(&posts).ColumnExpr(`post.*, 0.5 * (SELECT COUNT(*) FROM likes WHERE likes.post_id = post.id) +
+	err := r.db.Model(&posts).ColumnExpr(`post.*, (SELECT COUNT(*) FROM likes WHERE likes.post_id = post.id) AS likes_count, 0.5 * (SELECT COUNT(*) FROM likes WHERE likes.post_id = post.id) +
 		0.3 * (-EXTRACT(EPOCH FROM NOW() - post."createdAt") / 86400) +
 		1.0 *  CASE WHEN post.user_id IN (SELECT liked_posts.user_id FROM likes
 			JOIN posts AS liked_posts ON liked_posts.id = likes.post_id
